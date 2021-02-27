@@ -10,6 +10,7 @@ import crud, schemas
 import uvicorn
 
 # Create all tables in the DB when a migration is made
+# This is currently made by Alembic, so dont worry
 # models.Base.metadata.create_all(bind=engine)
 
 # Instanciate the backend
@@ -27,7 +28,7 @@ def get_db():
 
 
 @app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserBase, db: Session = Depends(get_db)):
+def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     """
     Endpoint to create a new user
     """
@@ -35,7 +36,7 @@ def create_user(user: schemas.UserBase, db: Session = Depends(get_db)):
 
 
 @app.get("/login/", response_model=schemas.User)
-def get_user(user: schemas.UserBase, db: Session = Depends(get_db)):
+def get_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     """
     Enpoint to retrieve a specific user data
     """
