@@ -35,12 +35,12 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@app.get("/login/", response_model=schemas.User)
-def get_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
+@app.post("/login/", response_model=schemas.User)
+def login_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     """
     Enpoint to retrieve a specific user data
     """
-    return crud.get_user(db=db, user=user)
+    return crud.login_user(db=db, user=user)
 
 
 # Programatically start the server

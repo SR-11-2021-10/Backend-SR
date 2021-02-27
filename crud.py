@@ -14,7 +14,7 @@ def hash_plain_password(password: str) -> str:
 
 
 # Get user's data only if the password provided is correct
-def get_user(db: Session, user: schemas.UserAuth):
+def login_user(db: Session, user: schemas.UserAuth):
     # Retrieve the user
     query_user = (
         db.query(models.User).filter(models.User.username == user.username).first()
