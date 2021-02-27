@@ -10,7 +10,7 @@ import hashlib
 
 # Hash plain text password
 def hash_plain_password(password: str) -> str:
-    return hashlib.sha1(bytes(password)).hexdigest()
+    return hashlib.sha1(bytes(password, "UTF-8")).hexdigest()
 
 
 # Get user's data only if the password provided is correct
@@ -25,7 +25,9 @@ def login_user(db: Session, user: schemas.UserAuth):
             status_code=404, detail=f"User: {user.username} does not exist !"
         )
     else:
-        if query_user.password is not hash_plain_password(user.password):
+        hashed_pass = hash_plain_password(user.password)
+        user_pass = query_user.hashed_password
+        if user_pass != hashed_pass:
             raise HTTPException(status_code=403, detail="Wrong password")
         else:
             return query_user
