@@ -4,7 +4,8 @@
 """
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-import models, schemas
+from db import models
+import schemas
 import hashlib
 
 # Hash plain text password

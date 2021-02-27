@@ -4,12 +4,13 @@
 """
 from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
-import crud, models, schemas
+from db.database import SessionLocal, engine
+from db import models
+import crud, schemas
 import uvicorn
 
 # Create all tables in the DB when a migration is made
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 # Instanciate the backend
 app = FastAPI()

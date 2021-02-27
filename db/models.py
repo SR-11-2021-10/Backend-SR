@@ -6,7 +6,7 @@
     https://fastapi.tiangolo.com/tutorial/sql-databases/?h=sql#create-the-database-models
 """
 from sqlalchemy import Boolean, Column, Integer, String
-from database import Base
+from .database import Base
 
 # Base is the base model we instanciate in database.py module
 # Now we are going to create the database models
