@@ -1,5 +1,6 @@
 # Ignores precompiled
 __pycache__/
 
-# Ignores version migrations
-versions/*
+# Ignores versions content
+versions/*.py
+versions/__pycache__

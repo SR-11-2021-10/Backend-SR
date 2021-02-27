@@ -1,10 +1,10 @@
 from __future__ import with_statement
-
 import os
-
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
+from db.base import Base 
+from db.database import get_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,7 +20,7 @@ fileConfig(config.config_file_name)
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
 
-from db.base import Base  # noqa
+#from db.base import Base 
 
 target_metadata = Base.metadata
 
@@ -28,14 +28,6 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-def get_url():
-    user = os.getenv("POSTGRES_USER", "ggonzr")
-    password = os.getenv("POSTGRES_PASSWORD", "ggonzr")
-    server = os.getenv("POSTGRES_SERVER", "localhost")
-    db = os.getenv("POSTGRES_DB", "ggonzr")
-    return f"postgresql://{user}:{password}@{server}/{db}"
-
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.

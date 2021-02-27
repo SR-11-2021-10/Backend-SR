@@ -8,11 +8,22 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
+
+def get_url():
+    """
+    Retrieve envirmontent variables to build database connection URL
+    """
+    user = os.getenv("POSTGRES_USER", "ggonzr")
+    password = os.getenv("POSTGRES_PASSWORD", "ggonzr")
+    server = os.getenv("POSTGRES_SERVER", "localhost")
+    db = os.getenv("POSTGRES_DB", "ggonzr")
+    return f"postgresql://{user}:{password}@{server}/{db}"
 
 # DB URI Connection
 # In this moment, I will work with my postgresql local db. Later, we will change it
 # to work with postgres container db
-SQLALCHEMY_DATABASE_URL = "postgresql://ggonzr:ggonzr@localhost:5432/ggonzr"
+SQLALCHEMY_DATABASE_URL = get_url()
 
 # Define the DB Engine the ORM will work with
 engine = create_engine(
