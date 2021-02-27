@@ -33,7 +33,7 @@ def get_url():
     Get server's host and port
     """
     host = os.getenv("HOST", "0.0.0.0")
-    port = os.getenv("PORT", "8000")
+    port = os.getenv("PORT", 8000)
     return host, port
 
 
