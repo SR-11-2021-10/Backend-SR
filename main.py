@@ -8,6 +8,7 @@ from db.database import SessionLocal, engine
 from db import models
 import crud, schemas
 import uvicorn
+import os
 
 # Create all tables in the DB when a migration is made
 # This is currently made by Alembic, so dont worry
@@ -25,6 +26,15 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def get_url():
+    """
+    Get server's host and port
+    """
+    host = os.getenv("HOST", "0.0.0.0")
+    port = os.getenv("PORT", "8000")
+    return host, port
 
 
 @app.post("/users/", response_model=schemas.User)
@@ -45,4 +55,5 @@ def login_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
 
 # Programatically start the server
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host, port = get_url()
+    uvicorn.run(app, host=host, port=port)
