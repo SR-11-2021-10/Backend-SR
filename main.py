@@ -6,9 +6,10 @@ from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from db import models
+from sh.alembic_start import alembic_migration
 import crud, schemas
-import uvicorn
 import os
+import uvicorn
 
 # Create all tables in the DB when a migration is made
 # This is currently made by Alembic, so dont worry
@@ -16,7 +17,6 @@ import os
 
 # Instanciate the backend
 app = FastAPI()
-
 
 # Dependency
 # Create a new connection to handle data
@@ -56,4 +56,5 @@ def login_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
 # Programatically start the server
 if __name__ == "__main__":
     host, port = get_url()
+    alembic_migration()
     uvicorn.run(app, host=host, port=port)
