@@ -13,14 +13,14 @@ class UserBase(BaseModel):
     when we receive a POST to create a new one or GET an existing one.
     """
 
-    username: str   
+    username: str
 
 
 class UserAuth(UserBase):
     """
     This schema allows us to parse the content off all client request including the password
-    """    
-    
+    """
+
     password: str
 
 
@@ -32,7 +32,9 @@ class User(UserBase):
     This is the main reason we create 3 schemas
     """
 
-    id: int
+    # Now the User PK is the username
+    # For this reason, a id PK is not longer needed
+    # id: int
 
     class Config:
         orm_mode = True

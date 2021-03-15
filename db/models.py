@@ -22,6 +22,5 @@ class User(Base):
     __tablename__ = "users"
 
     # Table Fields
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
+    username = Column(String, primary_key=True, index=True)
     hashed_password = Column(String)
