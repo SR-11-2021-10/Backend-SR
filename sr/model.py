@@ -155,7 +155,7 @@ class RecommenderSystem:
             The list of the ``k`` (inner) ids of the closest users (or items)
             to ``iid``.
         """
-        print("[RecommenderSystem] Custom neighbors")
+        print("[RecommenderSystem] Custom Neighbors")
 
         if self.model.sim_options["user_based"]:
             all_instances = self.model.trainset.all_users
@@ -164,8 +164,9 @@ class RecommenderSystem:
 
         others = [(x, self.model.sim[iid, x]) for x in all_instances() if x != iid]
         others.sort(key=lambda tple: tple[1], reverse=True)
-        print("Others: ", others)
-        k_nearest_neighbors = [j for (j, _) in others[:k]]
+        k_nearest_neighbors = [
+            (self.model.trainset.to_raw_iid(j), sim) for (j, sim) in others[:k]
+        ]
 
         return k_nearest_neighbors
 
@@ -190,14 +191,11 @@ class RecommenderSystem:
 
         # Lets retrieve 5 neighboors
         inner_id = self.model.trainset.to_inner_iid(iid)
-        item_neighboors = self.model.get_neighbors(inner_id, k=10)
-        item_id_neighbors = (
-            self.model.trainset.to_raw_iid(inner_id) for inner_id in item_neighboors
-        )
+        item_neighboors = self.__custom_get_neighbors(inner_id, k=10)
 
         return {
             "user": uid,
             "item": iid,
             "estimation": pred[3],
-            "neighbors": item_id_neighbors,
+            "neighbors": item_neighboors,
         }
