@@ -38,3 +38,25 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class Recommendation(BaseModel):
+    """
+    Request body to make a recommendation
+
+    Attributes
+    ----------
+    type : str
+        Type of model to create and predict
+    similitude : str
+        Similitude measure to use
+    username : str
+        Username to make the recommendation
+    artist : str
+        Artist id to predict
+    """
+
+    type: str
+    similitude: str
+    username: str
+    artist: str

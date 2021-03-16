@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from db import models
 from sh.alembic_start import alembic_migration
+from sr.load_data import load_data
 import crud, schemas
 import os
 import uvicorn
@@ -18,6 +19,9 @@ import uvicorn
 
 # Instanciate the backend
 app = FastAPI()
+
+# Load and save pandas dataframe
+pandas_dataframe = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -62,8 +66,20 @@ def login_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     return crud.login_user(db=db, user=user)
 
 
+@app.post("/recommend")
+def make_recommendation(recommendation: schemas.Recommendation):
+    """
+    Endpoint to retrieve a recommendation
+    """
+    return crud.make_recommendation(
+        data=pandas_dataframe, recommendation=recommendation
+    )
+
+
 # Programatically start the server
 if __name__ == "__main__":
+    # Load pandas dataframe
+    pandas_dataframe = load_data()
     host, port = get_url()
     alembic_migration()
     uvicorn.run(app, host=host, port=port)

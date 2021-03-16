@@ -57,6 +57,7 @@ class RecommenderSystem:
         user_item_rating : pd.DataFrame
             Dataframe including all users rating to an item
         """
+        print("[RecommenderSystem] Creating model")
         self.type = type
         self.similitude = similitude
         self.user_item_rating = user_item_rating
@@ -80,6 +81,7 @@ class RecommenderSystem:
         surprise.Dataset:
             Dataset loaded to be used with surprise
         """
+        print("[RecommenderSystem] Parsing data received to Surprise format")
         reader = Reader(rating_scale=(1, 5))
         return Dataset.load_from_df(self.user_item_rating, reader)
 
@@ -92,6 +94,8 @@ class RecommenderSystem:
         surprise.KNNBaseline:
             Model to be trained and used to make predictions
         """
+
+        print("[RecommenderSystem] Instantiate the model")
 
         # User-User Model
         if self.type == USER_USER:
@@ -126,12 +130,44 @@ class RecommenderSystem:
         """
         Fits the model with 80% of all available data
         """
-        train, test = train_test_split(self.data, test_size=0.2)
+        # train, test = train_test_split(self.data, test_size=0.0)
+        train = self.data.build_full_trainset()
         self.model.fit(train)
 
-        predictions = self.model.test(test)
-        rmse = accuracy.rmse(predictions)
-        print(f"Accuracy: {rmse}")
+        # predictions = self.model.test(test)
+        # rmse = accuracy.rmse(predictions)
+        print("[RecommenderSystem] Model fitted")
+        # print(f"Accuracy: {rmse}")
+
+    def __custom_get_neighbors(self, iid, k):
+        """Return the ``k`` nearest neighbors of ``iid``, which is the inner id
+        of a user or an item, depending on the ``user_based`` field of
+        ``sim_options`` (see :ref:`similarity_measures_configuration`).
+        As the similarities are computed on the basis of a similarity measure,
+        this method is only relevant for algorithms using a similarity measure,
+        such as the :ref:`k-NN algorithms <pred_package_knn_inpired>`.
+        For a usage example, see the :ref:`FAQ <get_k_nearest_neighbors>`.
+        Args:
+            iid(int): The (inner) id of the user (or item) for which we want
+                the nearest neighbors. See :ref:`this note<raw_inner_note>`.
+            k(int): The number of neighbors to retrieve.
+        Returns:
+            The list of the ``k`` (inner) ids of the closest users (or items)
+            to ``iid``.
+        """
+        print("[RecommenderSystem] Custom neighbors")
+
+        if self.model.sim_options["user_based"]:
+            all_instances = self.model.trainset.all_users
+        else:
+            all_instances = self.model.trainset.all_items
+
+        others = [(x, self.model.sim[iid, x]) for x in all_instances() if x != iid]
+        others.sort(key=lambda tple: tple[1], reverse=True)
+        print("Others: ", others)
+        k_nearest_neighbors = [j for (j, _) in others[:k]]
+
+        return k_nearest_neighbors
 
     def predict(self, uid: str, iid: str) -> dict:
         """
@@ -151,11 +187,13 @@ class RecommenderSystem:
         """
 
         pred = self.model.predict(uid=uid, iid=iid)
+
         # Lets retrieve 5 neighboors
-        item_neighboors = self.model.get_neighbors(iid, k=5)
-        item_id_neighbors = [
+        inner_id = self.model.trainset.to_inner_iid(iid)
+        item_neighboors = self.model.get_neighbors(inner_id, k=10)
+        item_id_neighbors = (
             self.model.trainset.to_raw_iid(inner_id) for inner_id in item_neighboors
-        ]
+        )
 
         return {
             "user": uid,

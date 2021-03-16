@@ -5,6 +5,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from db import models
+from sr.model import RecommenderSystem
+import pandas as pd
 import schemas
 import hashlib
 
@@ -44,3 +46,14 @@ def create_user(db: Session, user: schemas.UserAuth):
     # Get created user with ID to send into response
     db.refresh(db_user)
     return db_user
+
+
+def make_recommendation(data: pd.DataFrame, recommendation: schemas.Recommendation):
+    # Create the recommendation model
+    rs = RecommenderSystem(
+        type=recommendation.type,
+        similitude=recommendation.similitude,
+        user_item_rating=data,
+    )
+    prediction = rs.predict(uid=recommendation.username, iid=recommendation.artist)
+    return prediction
