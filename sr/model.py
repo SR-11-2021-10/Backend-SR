@@ -9,6 +9,9 @@ from surprise import Reader
 from surprise import KNNBaseline
 from surprise import accuracy
 from surprise.model_selection import train_test_split
+from sr.load_data import parse_neighbors_name
+
+# import sr.load_data import par
 
 # Let's write some constants
 USER_USER = "USER_USER"
@@ -170,7 +173,7 @@ class RecommenderSystem:
 
         return k_nearest_neighbors
 
-    def predict(self, uid: str, iid: str) -> dict:
+    def predict(self, uid: str, iid: str, artist: pd.DataFrame) -> dict:
         """
         Makes a new prediction for an unseen item according to the model created
 
@@ -197,5 +200,7 @@ class RecommenderSystem:
             "user": uid,
             "item": iid,
             "estimation": pred[3],
-            "neighbors": item_neighboors,
+            "neighbors": parse_neighbors_name(
+                neighbors=item_neighboors, artists=artist
+            ),
         }

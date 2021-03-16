@@ -48,12 +48,16 @@ def create_user(db: Session, user: schemas.UserAuth):
     return db_user
 
 
-def make_recommendation(data: pd.DataFrame, recommendation: schemas.Recommendation):
+def make_recommendation(
+    data: pd.DataFrame, recommendation: schemas.Recommendation, artist: pd.DataFrame
+):
     # Create the recommendation model
     rs = RecommenderSystem(
         type=recommendation.type,
         similitude=recommendation.similitude,
         user_item_rating=data,
     )
-    prediction = rs.predict(uid=recommendation.username, iid=recommendation.artist)
+    prediction = rs.predict(
+        uid=recommendation.username, iid=recommendation.artist, artist=artist
+    )
     return prediction
