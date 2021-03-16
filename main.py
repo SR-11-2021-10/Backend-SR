@@ -3,6 +3,7 @@
     In this module, we create a connection to the DB and implement all routes
 """
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from db import models
@@ -17,6 +18,14 @@ import uvicorn
 
 # Instanciate the backend
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency
 # Create a new connection to handle data
