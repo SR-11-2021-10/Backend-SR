@@ -57,7 +57,10 @@ def make_recommendation(
         similitude=recommendation.similitude,
         user_item_rating=data,
     )
-    prediction = rs.predict(
-        uid=recommendation.username, iid=recommendation.artist, artist=artist
-    )
-    return prediction
+    try:
+        prediction = rs.predict(
+            uid=recommendation.username, iid=recommendation.artist, artist=artist
+        )
+        return prediction
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)

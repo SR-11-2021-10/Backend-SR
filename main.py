@@ -2,7 +2,7 @@
     Main module to set all views(endpoints) and launch all the backend.
     In this module, we create a connection to the DB and implement all routes
 """
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
