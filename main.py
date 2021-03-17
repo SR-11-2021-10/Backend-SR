@@ -79,6 +79,14 @@ def make_recommendation(recommendation: schemas.Recommendation):
     )
 
 
+@app.get("/artist", response_model=schemas.Artist)
+def login_user(db: Session = Depends(get_db)):
+    """
+    Endpoint to retrieve all artist information
+    """
+    return crud.get_all_artist(db=db)
+
+
 # Programatically start the server
 if __name__ == "__main__":
     # Load pandas dataframe (Ratings)

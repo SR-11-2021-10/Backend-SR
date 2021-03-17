@@ -64,3 +64,11 @@ def make_recommendation(
         return prediction
     except Exception as e:
         raise HTTPException(status_code=500, detail=e)
+
+
+def get_all_artist(db: Session):
+    try:
+        artist = db.query(models.Artist).all()
+        return artist
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)

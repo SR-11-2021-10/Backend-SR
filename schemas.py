@@ -4,7 +4,7 @@
 """
 
 # Pydantic Base Schema
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
@@ -60,3 +60,15 @@ class Recommendation(BaseModel):
     similitude: str
     username: str
     artist: str
+
+
+class Artist(BaseModel):
+    """
+    Artist Response Schema
+    """
+
+    id: str = Field(..., alias="artist_id")
+    name: str = Field(..., alias="artist_name")
+
+    class Config:
+        orm_mode = True
