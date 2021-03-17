@@ -23,11 +23,13 @@ class User(Base):
     __tablename__ = "user"
 
     # Table Fields
-    user_id = Column(String(250), primary_key=True, index=True)
+    username = Column(String, primary_key=True, index=True)
     hashed_password = Column(String)
     gender = Column(String(2))
     age = Column(Integer)
     country = Column(String(250))
+
+
 #    username = Column(String, primary_key=True, index=True)
 #    hashed_password = Column(String)
 
@@ -53,8 +55,8 @@ class Rating(Base):
     # Table name in DB
     __tablename__ = "rating"
 
-    # Table Fields    
-    usert_id = relationship("User", back_populates="user_id")
+    # Table Fields
+    user_id = relationship("User", back_populates="username")
     artist_id = relationship("Artist", back_populates="artist_id")
     rating = Column(Integer, nullable=False)
 
@@ -67,7 +69,7 @@ class Estimation(Base):
     # Table name in DB
     __tablename__ = "estimation"
 
-    # Table Fields    
-    usert_id = relationship("User", back_populates="user_id")
+    # Table Fields
+    user_id = relationship("User", back_populates="username")
     artist_id = relationship("Artist", back_populates="artist_id")
     estimation = Column(Float, nullable=False)
