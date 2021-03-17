@@ -4,9 +4,9 @@ Lets mockup the data readed as a pandas.Dataframe
 
 import pandas as pd
 
-RATINGS = "data/user_item_2009_06.csv"
-ARTIST = "data/artist2.csv"
-JACCARD_SIMILARITY = "data/user_item_jaccard_sim_2009_06.csv"
+RATINGS = "sr/data/user_item_2009_06.csv"
+ARTIST = "sr/data/artist2.csv"
+JACCARD_SIMILARITY = "sr/data/user_item_jaccard_sim_2009_06.csv"
 
 # Read data as a pandas dataframe
 def load_data(path: str, sep: str):

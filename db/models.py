@@ -5,7 +5,7 @@
     SQLAlchemy handles this in a simple and easy way. Please read the next reference
     https://fastapi.tiangolo.com/tutorial/sql-databases/?h=sql#create-the-database-models
 """
-from sqlalchemy import Boolean, Column, Integer, String, Float
+from sqlalchemy import Boolean, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -23,13 +23,11 @@ class User(Base):
     __tablename__ = "user"
 
     # Table Fields
-    user_id = Column(String(250), primary_key=True, index=True)
+    username = Column(String, primary_key=True, index=True)
     hashed_password = Column(String)
     gender = Column(String(2))
     age = Column(Integer)
     country = Column(String(250))
-#    username = Column(String, primary_key=True, index=True)
-#    hashed_password = Column(String)
 
 
 class Artist(Base):
@@ -53,9 +51,9 @@ class Rating(Base):
     # Table name in DB
     __tablename__ = "rating"
 
-    # Table Fields    
-    usert_id = relationship("User", back_populates="user_id")
-    artist_id = relationship("Artist", back_populates="artist_id")
+    # Table Fields
+    user_id = Column(String, ForeignKey("user.username"), primary_key=True)
+    artist_id = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
     rating = Column(Integer, nullable=False)
 
 
@@ -67,7 +65,7 @@ class Estimation(Base):
     # Table name in DB
     __tablename__ = "estimation"
 
-    # Table Fields    
-    usert_id = relationship("User", back_populates="user_id")
-    artist_id = relationship("Artist", back_populates="artist_id")
+    # Table Fields
+    user_id = Column(String, ForeignKey("user.username"), primary_key=True)
+    artist_id = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
     estimation = Column(Float, nullable=False)
