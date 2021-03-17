@@ -100,6 +100,28 @@ def get_all_artists(db: Session = Depends(get_db)):
         return artist_db
 
 
+@app.get("/ratings/")
+def get_user_ratings(db: Session = Depends(get_db)):
+    """
+    Endpoint to retrieve all user ratings
+    """
+    # print("Username: ", username)
+    artist_model = crud.get_user_ratings(db=db)
+    print("Artist result: ", artist_model)
+    return {"msg": 1}
+    pydantic_response = parse_obj_as(List[schemas.Rating], artist_model)
+    print("[GetUserRatings] Pydantic response: ", pydantic_response)
+    # response = [r.dict() for r in pydantic_response]
+
+
+@app.post("/ratings/")
+def create_rating(ratings: List[schemas.Rating], db: Session = Depends(get_db)):
+    """
+    Endpoint to create a rating
+    """
+    return crud.create_rating(ratings=ratings, db=db)
+
+
 # Programatically start the server
 if __name__ == "__main__":
     # Load pandas dataframe (Ratings)

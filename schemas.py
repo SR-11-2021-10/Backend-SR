@@ -75,3 +75,16 @@ class Artist(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Rating(BaseModel):
+    user: str
+    item: str
+    rating: int
+
+
+class RatingResponse(Rating):
+    artistName: str = Field(alias="artist_id")
+
+    class Config:
+        orm_mode = True

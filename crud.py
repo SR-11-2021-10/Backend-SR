@@ -3,6 +3,7 @@
     This CRUD function will be use on the view (endpoints) implementation
 """
 from fastapi import HTTPException
+from typing import List
 from sqlalchemy.orm import Session
 from db import models
 from sr.model import RecommenderSystem
@@ -68,7 +69,30 @@ def make_recommendation(
 
 def get_all_artist(db: Session):
     try:
-        artist = db.query(models.Artist).all()        
+        artist = db.query(models.Artist).all()
         return artist
     except Exception as e:
         raise HTTPException(status_code=500, detail=e)
+
+
+def get_user_ratings(db: Session):
+    try:
+        query_ratings = (
+            db.query(models.Rating).filter(models.Rating.user == "user_000011").all()
+        )
+
+        # ratings = db.query(models.Rating).filter(models.Rating.user == username).all()
+        # response = db.query(ratings).join(models.Artist, models.Artist == ratings.item)
+        print("Crud response: ", query_ratings)
+        return {}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)
+
+
+def create_rating(ratings: List[schemas.Rating], db: Session):
+    for rating in ratings:
+        db_ratings = models.Rating(**rating.dict())
+        db.add(db_ratings)
+    # Commit transaction
+    db.commit()
+    return {"msg": "Operation complete"}
