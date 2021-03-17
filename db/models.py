@@ -5,7 +5,7 @@
     SQLAlchemy handles this in a simple and easy way. Please read the next reference
     https://fastapi.tiangolo.com/tutorial/sql-databases/?h=sql#create-the-database-models
 """
-from sqlalchemy import Boolean, Column, Integer, String, Float
+from sqlalchemy import Boolean, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -30,10 +30,6 @@ class User(Base):
     country = Column(String(250))
 
 
-#    username = Column(String, primary_key=True, index=True)
-#    hashed_password = Column(String)
-
-
 class Artist(Base):
     """
     Artist model. This represent the basic artist info
@@ -56,8 +52,8 @@ class Rating(Base):
     __tablename__ = "rating"
 
     # Table Fields
-    user_id = relationship("User", back_populates="username")
-    artist_id = relationship("Artist", back_populates="artist_id")
+    user_id = Column(String, ForeignKey("user.username"), primary_key=True)
+    artist_id = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
     rating = Column(Integer, nullable=False)
 
 
@@ -70,6 +66,6 @@ class Estimation(Base):
     __tablename__ = "estimation"
 
     # Table Fields
-    user_id = relationship("User", back_populates="username")
-    artist_id = relationship("Artist", back_populates="artist_id")
+    user_id = Column(String, ForeignKey("user.username"), primary_key=True)
+    artist_id = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
     estimation = Column(Float, nullable=False)

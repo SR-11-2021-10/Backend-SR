@@ -9,7 +9,6 @@ from surprise import Reader
 from surprise import KNNBaseline
 from surprise import accuracy
 from surprise.model_selection import train_test_split
-
 from sr.jaccard import Jaccard
 from sr.load_data import parse_neighbors_name
 
