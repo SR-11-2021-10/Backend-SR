@@ -64,7 +64,7 @@ def make_recommendation(
         )
         return prediction
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e)
+        raise HTTPException(status_code=500, detail={"msg": f"{e}"})
 
 
 def get_all_artist(db: Session):
@@ -72,7 +72,7 @@ def get_all_artist(db: Session):
         artist = db.query(models.Artist).all()
         return artist
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e)
+        raise HTTPException(status_code=500, detail={"msg": f"{e}"})
 
 
 def get_user_ratings(db: Session):
@@ -86,7 +86,7 @@ def get_user_ratings(db: Session):
         print("Crud response: ", query_ratings)
         return {}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e)
+        raise HTTPException(status_code=500, detail={"msg": f"{e}"})
 
 
 def create_rating(ratings: List[schemas.Rating], db: Session):
