@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import math
 import pandas as pd
 import numpy as np
@@ -27,7 +26,4 @@ class Jaccard:
 
     def predict(self, user, item):
         return self.estimate(user, item, self.df_similarity, self.df_rating)
-=======
-class Jaccard:
-    pass
->>>>>>> baea8b11aedd326c80715209a28ab830018b365f
+
