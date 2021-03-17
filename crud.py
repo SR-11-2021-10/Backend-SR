@@ -68,7 +68,7 @@ def make_recommendation(
 
 def get_all_artist(db: Session):
     try:
-        artist = db.query(models.Artist).all()
+        artist = db.query(models.Artist).all()        
         return artist
     except Exception as e:
         raise HTTPException(status_code=500, detail=e)

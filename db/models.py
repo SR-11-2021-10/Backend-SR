@@ -6,7 +6,6 @@
     https://fastapi.tiangolo.com/tutorial/sql-databases/?h=sql#create-the-database-models
 """
 from sqlalchemy import Boolean, Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
 from .database import Base
 
 # Base is the base model we instanciate in database.py module
@@ -25,9 +24,6 @@ class User(Base):
     # Table Fields
     username = Column(String, primary_key=True, index=True)
     hashed_password = Column(String)
-    gender = Column(String(2))
-    age = Column(Integer)
-    country = Column(String(250))
 
 
 class Artist(Base):
@@ -52,8 +48,8 @@ class Rating(Base):
     __tablename__ = "rating"
 
     # Table Fields
-    user_id = Column(String, ForeignKey("user.username"), primary_key=True)
-    artist_id = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
+    user = Column(String, ForeignKey("user.username"), primary_key=True)
+    item = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
     rating = Column(Integer, nullable=False)
 
 
@@ -66,6 +62,6 @@ class Estimation(Base):
     __tablename__ = "estimation"
 
     # Table Fields
-    user_id = Column(String, ForeignKey("user.username"), primary_key=True)
-    artist_id = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
+    user = Column(String, ForeignKey("user.username"), primary_key=True)
+    item = Column(String, ForeignKey("artist.artist_id"), primary_key=True)
     estimation = Column(Float, nullable=False)

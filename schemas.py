@@ -5,6 +5,7 @@
 
 # Pydantic Base Schema
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class UserBase(BaseModel):
@@ -67,8 +68,10 @@ class Artist(BaseModel):
     Artist Response Schema
     """
 
-    id: str = Field(..., alias="artist_id")
-    name: str = Field(..., alias="artist_name")
+    id: str = Field(alias="artist_id")
+    name: str = Field(alias="artist_name")
+    # artist_id: Optional[str]
+    # artist_name: Optional[str]
 
     class Config:
         orm_mode = True

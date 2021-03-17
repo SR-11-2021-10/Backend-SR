@@ -4,6 +4,8 @@
 """
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
+from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from db import models
@@ -25,6 +27,9 @@ ratings = None
 
 # Load and save artist info
 artist = None
+
+# Keep the artist names in memory to speed up the retrieve
+artist_db = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -79,12 +84,20 @@ def make_recommendation(recommendation: schemas.Recommendation):
     )
 
 
-@app.get("/artist", response_model=schemas.Artist)
-def login_user(db: Session = Depends(get_db)):
+@app.get("/artist")
+def get_all_artists(db: Session = Depends(get_db)):
     """
     Endpoint to retrieve all artist information
     """
-    return crud.get_all_artist(db=db)
+    global artist_db
+    if artist_db == None:
+        artist_model = crud.get_all_artist(db=db)
+        pydantic_response = parse_obj_as(List[schemas.Artist], artist_model)
+        response = [r.dict() for r in pydantic_response]
+        artist_db = response
+        return response
+    else:
+        return artist_db
 
 
 # Programatically start the server
