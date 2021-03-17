@@ -9,6 +9,8 @@ from surprise import Reader
 from surprise import KNNBaseline
 from surprise import accuracy
 from surprise.model_selection import train_test_split
+
+from sr.jaccard import Jaccard
 from sr.load_data import parse_neighbors_name
 
 # import sr.load_data import par
@@ -108,7 +110,7 @@ class RecommenderSystem:
             elif self.similitude == PEARSON:
                 return KNNBaseline(sim_options={"name": PEARSON, "user_base": True})
             elif self.similitude == JACCARD:
-                pass
+                return Jaccard()
             else:
                 raise RuntimeError("[RecommenderSystem] Similitude measure not found")
             pass
@@ -120,7 +122,7 @@ class RecommenderSystem:
             elif self.similitude == PEARSON:
                 return KNNBaseline(sim_options={"name": PEARSON, "user_base": False})
             elif self.similitude == JACCARD:
-                pass
+                return Jaccard()
             else:
                 raise RuntimeError("[RecommenderSystem] Similitude measure not found")
             pass
@@ -133,14 +135,18 @@ class RecommenderSystem:
         """
         Fits the model with 80% of all available data
         """
-        # train, test = train_test_split(self.data, test_size=0.0)
-        train = self.data.build_full_trainset()
-        self.model.fit(train)
 
-        # predictions = self.model.test(test)
-        # rmse = accuracy.rmse(predictions)
-        print("[RecommenderSystem] Model fitted")
-        # print(f"Accuracy: {rmse}")
+        if self.similitude == JACCARD:
+            self.model.fit()
+        else:
+            # train, test = train_test_split(self.data, test_size=0.0)
+            train = self.data.build_full_trainset()
+            self.model.fit(train)
+
+            # predictions = self.model.test(test)
+            # rmse = accuracy.rmse(predictions)
+            print("[RecommenderSystem] Model fitted")
+            # print(f"Accuracy: {rmse}")
 
     def __custom_get_neighbors(self, iid, k):
         """Return the ``k`` nearest neighbors of ``iid``, which is the inner id
@@ -189,18 +195,20 @@ class RecommenderSystem:
         dict:
             Information about prediction: Estimated and list of neighboors
         """
+        if self.similitude == JACCARD:
+            return self.model.predict(uid=uid, iid=iid)
+        else:
+            pred = self.model.predict(uid=uid, iid=iid)
 
-        pred = self.model.predict(uid=uid, iid=iid)
+            # Lets retrieve 5 neighboors
+            inner_id = self.model.trainset.to_inner_iid(iid)
+            item_neighboors = self.__custom_get_neighbors(inner_id, k=10)
 
-        # Lets retrieve 5 neighboors
-        inner_id = self.model.trainset.to_inner_iid(iid)
-        item_neighboors = self.__custom_get_neighbors(inner_id, k=10)
-
-        return {
-            "user": uid,
-            "item": iid,
-            "estimation": pred[3],
-            "neighbors": parse_neighbors_name(
-                neighbors=item_neighboors, artists=artist
-            ),
-        }
+            return {
+                "user": uid,
+                "item": iid,
+                "estimation": pred[3],
+                "neighbors": parse_neighbors_name(
+                    neighbors=item_neighboors, artists=artist
+                ),
+            }
