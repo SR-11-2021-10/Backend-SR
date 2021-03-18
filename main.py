@@ -75,12 +75,14 @@ def login_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
 
 
 @app.post("/recommend")
-def make_recommendation(recommendation: schemas.Recommendation):
+def make_recommendation(
+    recommendation: schemas.Recommendation, db: Session = Depends(get_db)
+):
     """
     Endpoint to retrieve a recommendation
     """
     return crud.make_recommendation(
-        data=ratings, recommendation=recommendation, artist=artist
+        data=ratings, recommendation=recommendation, artist=artist, db=db
     )
 
 

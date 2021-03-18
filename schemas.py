@@ -85,3 +85,8 @@ class Rating(BaseModel):
 
 class RatingResponse(Rating):
     artist_name: str
+
+
+class RatingModel(Rating):
+    class Config:
+        orm_mode = True

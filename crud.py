@@ -4,6 +4,7 @@
 """
 from fastapi import HTTPException
 from typing import List
+from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 from db import models
 from sr.model import RecommenderSystem
@@ -50,13 +51,19 @@ def create_user(db: Session, user: schemas.UserAuth):
 
 
 def make_recommendation(
-    data: pd.DataFrame, recommendation: schemas.Recommendation, artist: pd.DataFrame
+    data: pd.DataFrame,
+    recommendation: schemas.Recommendation,
+    artist: pd.DataFrame,
+    db: Session,
 ):
+    # Retrieves current ratings data
+    current_ratings = retrieve_all_ratings(db=db)
+
     # Create the recommendation model
     rs = RecommenderSystem(
         type=recommendation.type,
         similitude=recommendation.similitude,
-        user_item_rating=data,
+        user_item_rating=current_ratings,
     )
     try:
         prediction = rs.predict(
@@ -99,3 +106,27 @@ def create_rating(ratings: List[schemas.Rating], db: Session):
     # Commit transaction
     db.commit()
     return {"msg": "Operation complete"}
+
+
+def retrieve_all_ratings(db: Session) -> pd.DataFrame:
+    """
+    Retrieves all available in DB to be used to train the model
+
+    Returns
+    --------
+    pd.DataFrame:
+        Pandas dataframe with all ratings available to train the model
+    """
+    try:
+        ratings_orm = db.query(models.Rating).all()
+        ratings_pydantic = parse_obj_as(List[schemas.RatingModel], ratings_orm)
+        ratings_to_pandas = []
+        for r in ratings_pydantic:
+            r_dict = r.dict()
+            rating_to_list = [r_dict["user"], r_dict["item"], r_dict["rating"]]
+            ratings_to_pandas.append(rating_to_list)
+        print("[crud][retrieve_all_ratings] Current ratings retrieved")
+        return pd.DataFrame(data=ratings_to_pandas, columns=["user", "item", "rating"])
+    except Exception as e:
+        print("[Crud][retrieve_all_ratings] Error: ", e)
+        raise HTTPException(status_code=500, detail={"msg": f"{e}"})
