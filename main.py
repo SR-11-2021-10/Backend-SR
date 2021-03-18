@@ -100,18 +100,23 @@ def get_all_artists(db: Session = Depends(get_db)):
         return artist_db
 
 
-@app.get("/ratings/")
-def get_user_ratings(db: Session = Depends(get_db)):
+@app.get("/ratings/{username}")
+def get_user_ratings(username: str, db: Session = Depends(get_db)):
     """
     Endpoint to retrieve all user ratings
     """
-    # print("Username: ", username)
-    artist_model = crud.get_user_ratings(db=db)
-    print("Artist result: ", artist_model)
-    return {"msg": 1}
-    pydantic_response = parse_obj_as(List[schemas.Rating], artist_model)
-    print("[GetUserRatings] Pydantic response: ", pydantic_response)
-    # response = [r.dict() for r in pydantic_response]
+
+    user_ratings = crud.get_user_ratings(db=db, username=username)
+    response = [
+        schemas.RatingResponse(
+            user=rating_data.user,
+            item=rating_data.item,
+            rating=rating_data.rating,
+            artist_name=artist_data.artist_name,
+        )
+        for rating_data, artist_data in user_ratings
+    ]
+    return response
 
 
 @app.post("/ratings/")

@@ -75,17 +75,20 @@ def get_all_artist(db: Session):
         raise HTTPException(status_code=500, detail={"msg": f"{e}"})
 
 
-def get_user_ratings(db: Session):
+def get_user_ratings(db: Session, username: str):
     try:
-        query_ratings = (
-            db.query(models.Rating).filter(models.Rating.user == "user_000011").all()
+        ratings = (
+            db.query(models.Rating, models.Artist)
+            .filter(
+                models.Rating.item == models.Artist.artist_id,
+                models.Rating.user == username,
+            )
+            .all()
         )
-
-        # ratings = db.query(models.Rating).filter(models.Rating.user == username).all()
-        # response = db.query(ratings).join(models.Artist, models.Artist == ratings.item)
-        print("Crud response: ", query_ratings)
-        return {}
+        print("Crud response: ", ratings)
+        return ratings
     except Exception as e:
+        print("[Crud][get_user_ratings] Error: ", e)
         raise HTTPException(status_code=500, detail={"msg": f"{e}"})
 
 
