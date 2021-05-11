@@ -47,20 +47,17 @@ class Recommendation(BaseModel):
 
     Attributes
     ----------
-    type : str
-        Type of model to create and predict
-    similitude : str
-        Similitude measure to use
+    business : str
+        Type of business to filter
+    starts: int
+        Minimum numbers of starts to filter the recomendation
     username : str
         Username to make the recommendation
-    artist : str
-        Artist id to predict
     """
 
-    type: str
-    similitude: str
+    business: str
+    starts: int
     username: str
-    artist: str
 
 
 class Artist(BaseModel):

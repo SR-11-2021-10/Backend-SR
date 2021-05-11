@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from db import models
 from sh.alembic_start import alembic_migration
+from mockup.login import LOGIN
+from mockup.recomendation import RECOMENDATION
 import sr.load_data
 import crud, schemas
 import os
@@ -67,11 +69,12 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
 
 
 @app.post("/login/", response_model=schemas.User)
-def login_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
+def login_user(user: schemas.UserBase, db: Session = Depends(get_db)):
     """
     Enpoint to retrieve a specific user data
     """
-    return crud.login_user(db=db, user=user)
+    return LOGIN
+    # return crud.login_user(db=db, user=user)
 
 
 @app.post("/recommend")
@@ -81,9 +84,10 @@ def make_recommendation(
     """
     Endpoint to retrieve a recommendation
     """
-    return crud.make_recommendation(
-        data=ratings, recommendation=recommendation, artist=artist, db=db
-    )
+    return RECOMENDATION
+    # return crud.make_recommendation(
+    #    data=ratings, recommendation=recommendation, artist=artist, db=db
+    # )
 
 
 @app.get("/artist")
@@ -132,9 +136,9 @@ def create_rating(ratings: List[schemas.Rating], db: Session = Depends(get_db)):
 # Programatically start the server
 if __name__ == "__main__":
     # Load pandas dataframe (Ratings)
-    ratings = sr.load_data.load_data(sr.load_data.RATINGS, sep=",")
+    # ratings = sr.load_data.load_data(sr.load_data.RATINGS, sep=",")
     # Load artist dataframe (Artist)
-    artist = sr.load_data.load_data(sr.load_data.ARTIST, sep="\t")
+    # artist = sr.load_data.load_data(sr.load_data.ARTIST, sep="\t")
     host, port = get_url()
     alembic_migration()
     uvicorn.run(app, host=host, port=port)
