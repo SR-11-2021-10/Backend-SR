@@ -114,6 +114,7 @@ venv.bak/
 .spyderproject
 .spyproject
 
+
 # Rope project settings
 .ropeproject
 
@@ -130,3 +131,9 @@ dmypy.json
 
 # VS Code
 .vscode
+
+# Csv Data
+data/
+
+# IntelliJ PyCharm
+.idea/

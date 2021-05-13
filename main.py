@@ -2,20 +2,20 @@
     Main module to set all views(endpoints) and launch all the backend.
     In this module, we create a connection to the DB and implement all routes
 """
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
-from db.database import SessionLocal, engine
-from db import models
-from sh.alembic_start import alembic_migration
+from db.database import SessionLocal
 from mockup.login import LOGIN
 from mockup.recomendation import RECOMENDATION
-import sr.load_data
-import crud, schemas
+from model import algorithms, data
+import crud
+import schemas
 import os
 import uvicorn
+import time
 
 # Create all tables in the DB when a migration is made
 # This is currently made by Alembic, so dont worry
@@ -41,6 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Dependency
 # Create a new connection to handle data
 def get_db():
@@ -49,6 +50,19 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# Global variables
+df_boston = None
+df_words_user = None
+df_words_business = None
+df_boston_parsed_text = None
+dict_words_business = None
+dict_words_user = None
+dict_stars = None
+business_df = None
+svd_model = None
+log_regression = None
 
 
 def get_url():
@@ -60,6 +74,33 @@ def get_url():
     return host, port
 
 
+def instantiate_system():
+    """
+    Loads the data from dataset and creates and trains the
+    models.
+    """
+    begin = time.time()
+    global df_boston, business_df, svd_model, df_words_user, df_words_business, df_boston_parsed_text
+    global dict_words_business, dict_words_user, dict_stars
+    df_boston = data.load_df_boston()
+    business_df = data.load_business_df()
+    svd_model = algorithms.create_svd_model()
+
+    proyection = data.parse_df_boston(df_boston=df_boston)
+    train, validation, test = data.load_data_surprise_format(proyection=proyection)
+    algorithms.train_svd_model(svd_model, train=train)
+
+    df_words_user = data.load_user_pos_df()
+    df_words_business = data.load_business_pos_df()
+    df_boston_parsed_text, dict_words_user, dict_words_business, dict_stars = data.parse_text_model_df(df_boston,
+                                                                                                       df_words_user,
+                                                                                                       df_words_business)
+    log_regression = algorithms.create_train_logreg_model(df_boston_parsed_text)
+    finish = time.time()
+    print(f"[main][instantiate_system()] System loaded - Time: {finish - begin}")
+    return None
+
+
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     """
@@ -69,7 +110,7 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
 
 
 @app.post("/login/", response_model=schemas.User)
-def login_user(user: schemas.UserBase, db: Session = Depends(get_db)):
+def login_user(user: schemas.UserBase):
     """
     Enpoint to retrieve a specific user data
     """
@@ -79,7 +120,7 @@ def login_user(user: schemas.UserBase, db: Session = Depends(get_db)):
 
 @app.post("/recommend")
 def make_recommendation(
-    recommendation: schemas.Recommendation, db: Session = Depends(get_db)
+        recommendation: schemas.Recommendation
 ):
     """
     Endpoint to retrieve a recommendation
@@ -135,10 +176,6 @@ def create_rating(ratings: List[schemas.Rating], db: Session = Depends(get_db)):
 
 # Programatically start the server
 if __name__ == "__main__":
-    # Load pandas dataframe (Ratings)
-    # ratings = sr.load_data.load_data(sr.load_data.RATINGS, sep=",")
-    # Load artist dataframe (Artist)
-    # artist = sr.load_data.load_data(sr.load_data.ARTIST, sep="\t")
+    instantiate_system()
     host, port = get_url()
-    alembic_migration()
     uvicorn.run(app, host=host, port=port)
