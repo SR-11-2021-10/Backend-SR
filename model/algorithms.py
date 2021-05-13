@@ -209,7 +209,7 @@ def liftindex(predictions, verbose=True):
     return liftindex
 
 
-def _single_list_similarity(predicted: list, feature_df: pd.DataFrame, u: int = -1) -> float:
+def single_list_similarity(predicted: list, feature_df: pd.DataFrame, u: int = -1) -> float:
     """
     Computes the intra-list similarity for a single list of recommendations.
     Parameters

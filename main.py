@@ -8,8 +8,6 @@ from typing import List
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from mockup.login import LOGIN
-from mockup.recomendation import RECOMENDATION
 from model import algorithms, data
 import crud
 import schemas
@@ -63,6 +61,7 @@ dict_stars = None
 business_df = None
 svd_model = None
 log_regression = None
+top_10 = None
 
 
 def get_url():
@@ -81,7 +80,7 @@ def instantiate_system():
     """
     begin = time.time()
     global df_boston, business_df, svd_model, df_words_user, df_words_business, df_boston_parsed_text
-    global dict_words_business, dict_words_user, dict_stars
+    global dict_words_business, dict_words_user, dict_stars, top_10
     df_boston = data.load_df_boston()
     business_df = data.load_business_df()
     svd_model = algorithms.create_svd_model()
@@ -89,6 +88,8 @@ def instantiate_system():
     proyection = data.parse_df_boston(df_boston=df_boston)
     train, validation, test = data.load_data_surprise_format(proyection=proyection)
     algorithms.train_svd_model(svd_model, train=train)
+    pred_test = svd_model.test(test)
+    top_10 = algorithms.get_top_n(pred_test)
 
     df_words_user = data.load_user_pos_df()
     df_words_business = data.load_business_pos_df()
@@ -109,13 +110,12 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@app.post("/login/", response_model=schemas.User)
+@app.post("/login/")
 def login_user(user: schemas.UserBase):
     """
     Enpoint to retrieve a specific user data
     """
-    return LOGIN
-    # return crud.login_user(db=db, user=user)
+    return crud.login_user_df(user, df_boston)
 
 
 @app.post("/recommend")
@@ -125,7 +125,7 @@ def make_recommendation(
     """
     Endpoint to retrieve a recommendation
     """
-    return RECOMENDATION
+    return crud.make_recommendation_df(recommendation, top_10=top_10, business_df=business_df)
     # return crud.make_recommendation(
     #    data=ratings, recommendation=recommendation, artist=artist, db=db
     # )

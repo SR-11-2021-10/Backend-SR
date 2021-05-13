@@ -8,9 +8,11 @@ from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 from db import models
 from sr.model import RecommenderSystem
+from model import algorithms
 import pandas as pd
 import schemas
 import hashlib
+
 
 # Hash plain text password
 def hash_plain_password(password: str) -> str:
@@ -18,6 +20,13 @@ def hash_plain_password(password: str) -> str:
 
 
 # Get user's data only if the password provided is correct
+def login_user_df(user: schemas.UserBase, df_boston: pd.DataFrame):
+    if user.username in df_boston[['user_id']].values:
+        return {"username": user.username}
+    else:
+        raise HTTPException(status_code=404, detail=f"User: {user.username} does not exist !")
+
+
 def login_user(db: Session, user: schemas.UserAuth):
     # Retrieve the user
     query_user = (
@@ -37,6 +46,23 @@ def login_user(db: Session, user: schemas.UserAuth):
             return query_user
 
 
+def make_recommendation_df(reco: schemas.Recommendation, top_10, business_df: pd.DataFrame):
+    u_top_10 = top_10[reco.username]
+    i_list = [i[1] for i in u_top_10]
+    ild = None
+    try:
+        ild = algorithms.single_list_similarity(i_list, business_df)
+    except Exception:
+        ild = 0
+
+    metrics = {"liftscore": algorithms.liftindex(u_top_10), "ndcg": algorithms.ndcg(u_top_10),
+               "ild": ild}
+    return {
+        'list': u_top_10,
+        'metrics': metrics
+    }
+
+
 def create_user(db: Session, user: schemas.UserAuth):
     hash_password = hash_plain_password(user.password)
     # New instance of User
@@ -51,10 +77,10 @@ def create_user(db: Session, user: schemas.UserAuth):
 
 
 def make_recommendation(
-    data: pd.DataFrame,
-    recommendation: schemas.Recommendation,
-    artist: pd.DataFrame,
-    db: Session,
+        data: pd.DataFrame,
+        recommendation: schemas.Recommendation,
+        artist: pd.DataFrame,
+        db: Session,
 ):
     # Retrieves current ratings data
     current_ratings = retrieve_all_ratings(db=db)
@@ -86,11 +112,11 @@ def get_user_ratings(db: Session, username: str):
     try:
         ratings = (
             db.query(models.Rating, models.Artist)
-            .filter(
+                .filter(
                 models.Rating.item == models.Artist.artist_id,
                 models.Rating.user == username,
             )
-            .all()
+                .all()
         )
         print("Crud response: ", ratings)
         return ratings
